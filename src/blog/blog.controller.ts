@@ -7,7 +7,7 @@ import { UpdateBlogDto } from './dto/update-blog.dto';
 
 @Controller('blog')
 
-@UseGuards(AuthGuard('jwt'))
+@UseGuards(AuthGuard())
 export class BlogController {
   constructor(private readonly blogService: BlogService) {}
 

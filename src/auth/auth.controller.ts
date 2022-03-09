@@ -23,7 +23,6 @@ export class AuthController {
     @Post('/signin')
     async signIn(@Body(ValidationPipe)signInCredentialsDto:signInCredentialsDto):Promise<{accessToken:string,user:User}>{
         // console.log(await this.authservice.signIn(signInCredentialsDto))
-        console.log('kkk')
         return await this.authservice.signIn(signInCredentialsDto)
     }
 }

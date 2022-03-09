@@ -29,6 +29,7 @@ import { UserRepository } from './user.repository';
   exports:[
     Jwtstrategy,
     PassportModule,
+    AuthService,
   ]
 })
 export class AuthModule {}

@@ -1,6 +1,6 @@
 import { BadRequestException, Inject, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
-import e, { Request } from 'express';
+import { Request } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import { InjectConnection } from '@nestjs/typeorm';
 import { Connection, getRepository } from 'typeorm';
@@ -8,13 +8,15 @@ import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
 import { Blog } from './entities/blog.entity';
 import internal from 'stream';
+import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
 export class BlogService {
   constructor(
     @InjectConnection()
     private readonly connection: Connection,
-    private jwtService: JwtService,
+    private readonly authService:AuthService,
+
     @Inject(REQUEST)
     private readonly request: Request,
   ) { }
@@ -52,15 +54,16 @@ export class BlogService {
   async findOne(id: number) {
     try{
       const blogRepo = getRepository(Blog)
-      const userByRequest = await this.request.user
-      console.log(userByRequest)
-      // const result =  (await blogRepo.find({ user: userByRequest })).find(blog => blog.id === id)
-      const result = await blogRepo.findOne({where:{id,userId:userByRequest}})
-      if(!result) throw new BadRequestException('invalid id');
-
+      const userId = this.authService.getUserId()
+      console.log({userId})
+      const result = await blogRepo.findOne({where:{id,userId}})
+      console.log({result})
+      if(!result) {
+        throw new BadRequestException('invalid id')
+      };
       return result;
     }catch(error){
-      throw new InternalServerErrorException();
+      throw new InternalServerErrorException(error);
     }
   }
 
@@ -69,17 +72,20 @@ export class BlogService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
+      console.log('kkk')
       await this.findOne(id)
-      // const blogRepo = queryRunner.manager.getRepository(Blog)
-      // await blogRepo.update({id},updateBlogDto)
+      const blogRepo = queryRunner.manager.getRepository(Blog)
+      await blogRepo.update({id},updateBlogDto)
       await queryRunner.commitTransaction()
       const blog = await this.findOne(id); 
       return  blog;
     }catch (error) {
-      queryRunner.rollbackTransaction()
+      await queryRunner.rollbackTransaction()
+      console.log('bb')
       throw new InternalServerErrorException(error)
-    }finally{
-      queryRunner.release()
+    }
+    finally{
+      await queryRunner.release()
     }
   }
 
@@ -88,13 +94,15 @@ export class BlogService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const find = await this.findOne(id)
+      
       const blogRepo = queryRunner.manager.getRepository(Blog)
       await this.findOne(id)
       await blogRepo.softDelete(id)
       await queryRunner.commitTransaction()
+
     } catch (error) {
-      
+      queryRunner.rollbackTransaction();
+      throw new InternalServerErrorException(error)
     }
     
   }

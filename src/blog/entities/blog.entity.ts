@@ -23,6 +23,7 @@ export class Blog {
 
     @DeleteDateColumn()
     deletedOn:Date;
+    
     @Column({nullable:true})
     userId : number
 
