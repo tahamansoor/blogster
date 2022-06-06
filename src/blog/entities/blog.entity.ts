@@ -1,4 +1,5 @@
 import { User } from "src/auth/user.entity";
+import { Like } from "src/likes/entities/like.entity";
 import { Column, CreateDateColumn, DeleteDateColumn, Entity, ManyToOne, OneToMany, PrimaryColumn, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity()
@@ -29,5 +30,9 @@ export class Blog {
 
     @ManyToOne(()=>User)
     user:User
+
+    @ManyToOne(()=>Like)
+    likes:Like[]
+
 
 }

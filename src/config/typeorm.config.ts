@@ -3,6 +3,7 @@ import { TypeOrmModuleOptions } from "@nestjs/typeorm";
 import { User } from "src/auth/user.entity";
 import { Blog } from "src/blog/entities/blog.entity";
 import { Comment } from "src/comments/entities/comment.entity";
+import { Like } from "src/likes/entities/like.entity";
 
 
 export const typeOrmConfig: TypeOrmModuleOptions = {
@@ -13,7 +14,7 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
     database: process.env.DB_NAME || 'test',
     username: process.env.DB_USER || 'postgres',
     password: process.env.DB_PASS || '12345678',    
-    entities: [User,Blog,Comment],
+    entities: [User,Blog,Comment,Like],
     synchronize: true
 }
 console.log(typeOrmConfig)
