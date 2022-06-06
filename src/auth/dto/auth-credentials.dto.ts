@@ -23,7 +23,6 @@ export class AuthCredentialsDto {
 
     @ApiProperty()
     @IsString()
-    @IsUrl()
     profilePic:string;
 
     

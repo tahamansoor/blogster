@@ -41,12 +41,16 @@ export class BlogService {
   async findAll() {
     try{
       const blogRepo = getRepository(Blog)
-      const userByRequest = await this.request.user
-      const result = blogRepo.find({user:userByRequest})
+      const userId = await this.authService.getUserId()
+      console.log(userId)
+      const result = await blogRepo.createQueryBuilder('blg')
+      .where('blg.userId = :userId',{userId})
+      .leftJoinAndSelect('blg.user','user')
+      .getMany()
       return result;
       
     }catch(error){
-      throw new InternalServerErrorException();
+      throw new InternalServerErrorException(error);
     }
 
   }
@@ -105,5 +109,11 @@ export class BlogService {
       throw new InternalServerErrorException(error)
     }
     
+  }
+  async findByid(id:number){
+    const blogRepo = getRepository(Blog)
+    const res = await blogRepo.findOne({where:{id}})
+    console.log(res)
+    return res;
   }
 }

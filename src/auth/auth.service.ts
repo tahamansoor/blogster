@@ -9,6 +9,7 @@ import * as bcrypt from 'bcrypt';
 import { User } from './user.entity';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
+import { getRepository } from 'typeorm';
 
 
 @Injectable()
@@ -51,6 +52,21 @@ export class AuthService {
         } catch (error) {
             throw new InternalServerErrorException(error)
         }
+        
     }
-
+    
+    async getProfile(){
+        try {
+            const userRepo = getRepository(User)
+            const userId = this.request.user['id']
+            const query = userRepo.createQueryBuilder('usr')
+            .where('usr.id = :userId',{userId:userId})
+            .leftJoinAndSelect('user.blog','blog')
+            .getOne()
+            return query;
+            
+        } catch (error) {
+            throw error
+        }
+    }
 }
